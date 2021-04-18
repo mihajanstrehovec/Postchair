@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title></title>
+  <link href="style.css" rel="stylesheet" />
+</head>
+<body>
+  <h1>
+    Posture check
+  </h1>
+  <button onclick="onButtonClick()">Začni s preverjanjem</button>
+  <div>
+    <svg id="svg1" xmlns="http://www.w3.org/2000/svg" style="width: 3.5in; height: 1in">
+      <circle id="circle1" r="30" cx="34" cy="34" 
+                style="fill: black; stroke-width: 2"/>
+    </svg>
+  </div>
+  
+  
+
+  
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+  <script>
+    function onButtonClick() {
+      console.log('Requesting Bluetooth Device...');
+      navigator.bluetooth.requestDevice(
+        {filters: [{services: ['battery_service']}]})
+      .then(device => {
+        console.log('Connecting to GATT Server...');
+        return device.gatt.connect();
+      })
+      .then(server => {
+        console.log('Getting Posture Service...');
+        return server.getPrimaryService('battery_service');
+      })
+      .then(service => {
+        console.log('Getting Posture Characteristic...');
+        return service.getCharacteristic('battery_level');
+      })
+      .then(characteristic => {
+        console.log("Entering Reading loop.");
+        readValueContinuous(characteristic);
+      })
+      
+      .catch(error => {
+        console.log('Argh! ' + error);
+      });
+    };
+
+    function readValueContinuous(characteristic){
+      console.log('Reading Posture...');
+      characteristic.readValue().then(value => {
+        posture = value.getUint8(0);
+        console.log(posture);
+        determinePosture(posture);
+        setTimeout(readValueContinuous(characteristic), 500);
+      })
+    };
+
+    function determinePosture(postureInt) {
+      switch(postureInt) {
+        case 1:
+          circle1.style.fill='green';
+          break;
+
+        case 0:
+          circle1.style.fill='red';
+          break;
+
+        case 4:
+          circle1.style.fill='yellow';
+          break;
+
+        default:
+          circle1.style.fill='black';
+      }
+    }
+  </script>
+</body>
+</html>
