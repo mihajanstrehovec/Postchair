@@ -1,0 +1,111 @@
+html{
+    
+    padding: 0px;
+}
+
+#page-title-div{
+    display: grid;
+    width: 300px;
+    height: 100px;
+    color: white;
+    font-family: sans-serif;
+    margin: 0px;
+    padding: 0px;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+   
+}
+
+#page-info-div{
+    display: grid;
+    width: 120px;
+    height: 120px;
+    color: white;
+    font-family: sans-serif;
+    margin: 0px;
+    padding: 0px;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    position: fixed;
+    top: 0px;
+    right: 0px;
+    
+   
+}
+
+#info-btn-img{
+    z-index: 1000000;
+}
+
+#title{
+    margin: 0px;
+    padding: 0px;
+    z-index: 10000;
+}
+
+#fullscreencontainer{
+    display: grid;
+    width: 100%;
+    height: 100vh;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    margin: 0px;
+    background-color: #5ED8F2;
+
+    
+    
+}
+
+#startposturecheckbtn{
+    border: none;
+    border-radius: 0px;
+    background-color: rgba(0,0,0,0);
+    
+}
+
+#stopbtn{
+    background-color: rgba(0,0,0,0);
+    border-radius: 0px;
+    border: none;
+    
+}
+
+#stop-btn-img{
+    width: 3vw;
+    height: auto;
+}
+
+
+#info-btn{
+    border: none;
+    border-radius: 0px;
+    background-color: rgba(0,0,0,0)
+}
+
+#start-btn-img{
+    width: 5vw;
+    height: auto;
+}
+
+.modal-body{
+    font-size: 1.25em;
+}
+
+.modal-title{
+    font-size: 2em;
+    font-weight: bold;
+}
+
+.modal-header{
+    background-color: #5ED8F2;
+    color: white;
+}
+
+#close-mod{
+    color: red;
+}

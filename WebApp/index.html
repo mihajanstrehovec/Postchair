@@ -1,28 +1,108 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <title></title>
-  <link href="style.css" rel="stylesheet" />
+  <link href="index.css" rel="stylesheet" />
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 </head>
+
 <body>
-  <h1>
-    Posture check
-  </h1>
-  <button onclick="onButtonClick()">Začni s preverjanjem</button>
-  <div>
-    <svg id="svg1" xmlns="http://www.w3.org/2000/svg" style="width: 3.5in; height: 1in">
-      <circle id="circle1" r="30" cx="34" cy="34" 
-                style="fill: black; stroke-width: 2"/>
-    </svg>
+
+  <div id = "page-title-div">
+
+    <h1 id = "title">
+      Posture check
+    </h1>
+  
+  </div>
+
+  <div id = "page-info-div">
+
+    <button data-toggle="modal" data-target="#exampleModalCenter" id = "info-btn"><img src = "img/info-button.svg" id = "info-btn-img"></button>
+  
   </div>
   
+  <div id = "fullscreencontainer">
+
+    <button onclick="onButtonClick()" id = "startposturecheckbtn"><img src = "img/start-button.svg" id = "start-btn-img"></button>
+    <button onclick="onStopClick()" id = "stopbtn" style = "display: none;"><img src = "img/stop-button.svg" id = "stop-btn-img"></button>
+  
+  </div>
+
+
+
+
+  <!-- INFO MODAL -->
+  <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLongTitle">HOW TO USE</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span id= "close-mod" aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <ol>
+            <li>
+              Plug in your <b> Arduino </b>
+            </li>
+            <li>
+              Press the <b>start</b> button
+            </li>
+            <li>
+              Pay attention to the <b>backrgound color / sounds</b> that notify you about your posture
+              <ul>
+                <li>
+                  <span style = "color: #6CEB6A;">Green:</span> Your posture is perfect
+                </li>
+                <li>
+                  <span style = "color: #F25E5E;">Red:</span> Your posture is not as it should be
+                </li>
+                <li>
+                  <span style = "color: #F2C95E;">Yellow:</span> Uncertain
+                </li>
+              </ul>
+            </li>
+            <li>
+              Press the <b>stop</b> button when you want to stop
+            </li>
+          </ol>
+
+        </div>
+        
+      </div>
+    </div>
+  </div>
   
 
-  
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+
+
   <script>
+    let BUFFER = [];
+    let iBuf = 0;
+    let length = 20; //(/2 == sekunde)
+
+    for(let i = 0; i < length; i++) {
+        BUFFER.push(-1);
+    }
+
     function onButtonClick() {
+
+      const startBtn = document.getElementById("startposturecheckbtn");
+      const stopBtn = document.getElementById("stopbtn");
+      
+      startBtn.disabled = true;
+      stopBtn.disabled = false;
+      
+      startBtn.style.display = "none";
+      stopBtn.style.display = "block";
+
+
       console.log('Requesting Bluetooth Device...');
       navigator.bluetooth.requestDevice(
         {filters: [{services: ['battery_service']}]})
@@ -48,6 +128,10 @@
       });
     };
 
+    function onStopClick(){
+      window.location.reload();
+    }
+
     function readValueContinuous(characteristic){
       console.log('Reading Posture...');
       characteristic.readValue().then(value => {
@@ -59,23 +143,48 @@
     };
 
     function determinePosture(postureInt) {
-      switch(postureInt) {
+      BUFFER[iBuf] = postureInt;
+      console.log("trenutna drža: ", postureInt);
+      if (iBuf == length-1) iBuf=0;
+      else iBuf++;
+      let postureInterval = checkBuf();
+      switch(postureInterval) {
         case 1:
-          circle1.style.fill='green';
+          fullscreencontainer.style.backgroundColor = "#6CEB6A";
+          // circle1.style.fill='green';
           break;
 
         case 0:
-          circle1.style.fill='red';
+          fullscreencontainer.style.backgroundColor = "#F25E5E";
+          // circle1.style.fill='red';
           break;
 
         case 4:
-          circle1.style.fill='yellow';
+          fullscreencontainer.style.backgroundColor = "#F2C95E";
+          // circle1.style.fill='#';
           break;
 
         default:
-          circle1.style.fill='black';
+          fullscreencontainer.style.backgroundColor = "#5ED8F2";
+          // circle1.style.fill='black';
       }
     }
+
+    function checkBuf() {
+      let base = BUFFER[0];
+      console.log("BUFFER: ", BUFFER);
+      for(var i = 1; i < length; i++) {
+        if (BUFFER[i] == base) continue;
+        else return -1;
+      }
+      return base;
+    }
   </script>
+
+
+  
+
+  <!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 </body>
 </html>
