@@ -67,7 +67,9 @@
 
     function determinePosture(postureInt) {
       BUFFER[iBuf] = postureInt;
-      iBuf++;
+      console.log("trenutna drža: ", postureInt);
+      if (iBuf == length-1) iBuf=0;
+      else iBuf++;
       let postureInterval = checkBuf();
       switch(postureInterval) {
         case 1:
@@ -89,6 +91,7 @@
 
     function checkBuf() {
       let base = BUFFER[0];
+      console.log("BUFFER: ", BUFFER);
       for(var i = 1; i < length; i++) {
         if (BUFFER[i] == base) continue;
         else return -1;
