@@ -28,8 +28,19 @@
   <div id = "fullscreencontainer">
 
     <button onclick="onButtonClick()" id = "startposturecheckbtn"><img src = "img/start-button.svg" id = "start-btn-img"></button>
-    <button onclick="onStopClick()" id = "stopbtn" style = "display: none;"><img src = "img/stop-button.svg" id = "stop-btn-img"></button>
-  
+
+    <!-- Loading circle -->
+    <div class="lds-ellipsis"><div id = "displayLoad"></div><div></div><div></div><div></div></div>
+    
+    <div id = "posture-display">
+      <button onclick="onStopClick()" id = "stopbtn" style = "display: none;"><img src = "img/stop-button.svg" id = "stop-btn-img"></button>
+      
+      <h4 id = "postureStatus">
+      
+      </h4>
+
+    </div>
+    
   </div>
 
 
@@ -94,13 +105,16 @@
     function onButtonClick() {
 
       const startBtn = document.getElementById("startposturecheckbtn");
+      const loadAnim = document.getElementById("displayLoad");
       const stopBtn = document.getElementById("stopbtn");
+      const postStat = document.getElementById("postureStatus");
       
       startBtn.disabled = true;
-      stopBtn.disabled = false;
+      
       
       startBtn.style.display = "none";
-      stopBtn.style.display = "block";
+      loadAnim.style.display = "block";
+      
 
 
       console.log('Requesting Bluetooth Device...');
@@ -121,6 +135,10 @@
       .then(characteristic => {
         console.log("Entering Reading loop.");
         readValueContinuous(characteristic);
+        stopBtn.disabled = false;
+        loadAnim.style.display = "none";
+        stopBtn.style.display = "block";
+        postStat.style.display = "block";
       })
       
       .catch(error => {
@@ -151,21 +169,25 @@
       switch(postureInterval) {
         case 1:
           fullscreencontainer.style.backgroundColor = "#6CEB6A";
+          document.getElementById("postureStatus").innerHTML = "Good posture.";
           // circle1.style.fill='green';
           break;
 
         case 0:
           fullscreencontainer.style.backgroundColor = "#F25E5E";
+          document.getElementById("postureStatus").innerHTML = "Bad posture!";
           // circle1.style.fill='red';
           break;
 
         case 4:
           fullscreencontainer.style.backgroundColor = "#F2C95E";
+          document.getElementById("postureStatus").innerHTML = "Uncertain.";
           // circle1.style.fill='#';
           break;
 
         default:
           fullscreencontainer.style.backgroundColor = "#5ED8F2";
+          document.getElementById("postureStatus").innerHTML = "Wait, please be patient...";
           // circle1.style.fill='black';
       }
     }
