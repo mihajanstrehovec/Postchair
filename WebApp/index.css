@@ -7,13 +7,14 @@ html{
     display: grid;
     width: 300px;
     height: 100px;
-    color: white;
+    color: #5ED8F2;
     font-family: sans-serif;
     margin: 0px;
     padding: 0px;
     align-items: center;
     justify-content: center;
     z-index: 10000;
+    background-color: white;
    
 }
 
