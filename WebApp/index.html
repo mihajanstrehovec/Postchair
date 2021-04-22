@@ -169,16 +169,15 @@
       switch(postureInterval) {
         case 1:
           fullscreencontainer.style.backgroundColor = "#6CEB6A";
-          
+          document.getElementById("postureStatus").innerHTML = "Good posture.";
           break;
 
         case 0:
           fullscreencontainer.style.backgroundColor = "#F25E5E";
           document.getElementById("postureStatus").innerHTML = "Bad posture!";
-          document.getElementById("postureStatus").innerHTML = "Good posture.";
+          
           var mp3 = '<source src="sfx/bad.mp3" type="audio/mpeg">';
           document.getElementById("sound").innerHTML = '<audio autoplay="autoplay">' + mp3 + "</audio>";
-          
           break;
 
         case 4:
@@ -192,9 +191,7 @@
           document.getElementById("postureStatus").innerHTML = "Wait, please be patient...";
           // circle1.style.fill='black';
           fullscreencontainer.style.backgroundColor = "#6CEB6A";
-          document.getElementById("postureStatus").innerHTML = "Good posture.";
-          var mp3 = '<source src="sfx/bad.mp3" type="audio/mpeg">';
-          document.getElementById("sound").innerHTML = '<audio autoplay="autoplay">' + mp3 + "</audio>";
+         
       }
     }
 
