@@ -24,25 +24,24 @@
 #include <postchair_v2_inference.h>
 #include <Arduino_LSM9DS1.h>
 
-
-
 // BLE INICIALIZATION //
 #include <ArduinoBLE.h>
 
-// BLE Battery Service
-BLEService batteryService("180F");
+// BLE Posture Service
+BLEService postureService("757ab0ec-a387-11eb-bcbc-0242ac130000");
 
-// BLE Battery Level Characteristic
-BLEUnsignedCharCharacteristic batteryLevelChar("2A19",  // standard 16-bit characteristic UUID
-    BLERead | BLENotify); // remote clients will be able to get notifications if this characteristic changes
+// BLE Posture Characteristic
+BLECharacteristic postureChar("757ab0ec-a387-11eb-bcbc-0242ac130001", BLERead | BLEWrite, 1);
 
-int oldBatteryLevel = 0;  // last battery level reading from analog input
-long previousMillis = 0;  // last time the battery level was checked, in ms
-//
-
+int oldPostureLevel = -1;
 
 /* Constant defines -------------------------------------------------------- */
 #define CONVERT_G_TO_MS2    9.80665f
+
+#define RED 22     
+#define BLUE 24     
+#define GREEN 23
+#define LED_PWR 25
 
 /* Private variables ------------------------------------------------------- */
 static bool debug_nn = false; // Set this to true to see e.g. features generated from the raw signal
@@ -59,6 +58,10 @@ void run_inference_background();
 */
 void setup()
 {
+    pinMode(RED, OUTPUT);
+    pinMode(BLUE, OUTPUT);
+    pinMode(GREEN, OUTPUT);
+    pinMode(LED_PWR, OUTPUT);
     // put your setup code here, to run once:
     Serial.begin(115200);
     while (!Serial);
@@ -81,8 +84,6 @@ void setup()
     inference_thread.start(mbed::callback(&run_inference_background));
 
 
-
-
 // BLE SETUP //
     // begin initialization
   if (!BLE.begin()) {
@@ -96,11 +97,11 @@ void setup()
      and can be used by remote devices to identify this BLE device
      The name can be changed but maybe be truncated based on space left in advertisement packet
   */
-  BLE.setLocalName("BatteryMonitor");
-  BLE.setAdvertisedService(batteryService); // add the service UUID
-  batteryService.addCharacteristic(batteryLevelChar); // add the battery level characteristic
-  BLE.addService(batteryService); // Add the battery service
-  batteryLevelChar.writeValue(oldBatteryLevel); // set initial value for this characteristic
+  BLE.setLocalName("PostureMonitor");
+  BLE.setAdvertisedService(postureService); // add the service UUID
+  postureService.addCharacteristic(postureChar); // add the posture characteristic
+  BLE.addService(postureService); // Add the posture service
+  postureChar.writeValue(byte(oldPostureLevel)); // set initial value for this characteristic
 
   /* Start advertising BLE.  It will start continuously transmitting BLE
      advertising packets and will be visible to remote BLE central devices
@@ -112,8 +113,6 @@ void setup()
   Serial.println("Bluetooth device active, waiting for connections...");
 
   // 
-
-
 
   
 }
@@ -133,7 +132,7 @@ void ei_printf(const char *format, ...) {
 
    if (r > 0) {
        Serial.write(print_buf);
-       //batteryLevelChar.writeValue(print_buf);
+       //postureChar.writeValue(print_buf);
    }
 }
 
@@ -188,17 +187,31 @@ void run_inference_background()
         int uncertain = 4;
         int elses = -1;
         char *check = "gbu";
+
+        turnOffLED();
         
-        // če direkt kopiraš iz serial monitorja "good-posture-amadej" in tle prilepiš, pol dela (?!)
-        // zato sem šel raje na prvo črko samo, ki pa ni tolk straightforward (faking c <3), zato je ta char *check
+        // če direkt kopiraš iz serial monitorja npr "good-posture-amadej" in tle prilepiš, pol dela (?!)
+        // zato sem šel raje na prvo črko samo, ki pa ni tolk straightforward, zato je še ta char *check
+        
         if(prediction[0] == check[0]){
-          batteryLevelChar.writeValue(1);
+          postureChar.writeValue(byte(1));
+          turnOffLED();
+          digitalWrite(RED, HIGH);
+          
         } else if (prediction == "uncertain") {
-          batteryLevelChar.writeValue(4);
+          postureChar.writeValue(byte(4));
+          turnOffLED();
+          digitalWrite(RED, HIGH);
+          digitalWrite(GREEN, HIGH);
+          
         } else if (prediction[0] == check[1]){
-          batteryLevelChar.writeValue(0);
+          postureChar.writeValue(byte(0));
+          turnOffLED();
+          digitalWrite(GREEN, HIGH);
+          
         } else {
-          batteryLevelChar.writeValue(-1);
+          turnOffLED();
+          postureChar.writeValue(byte(-1));
         }
         //
         // print the cumulative results
@@ -236,8 +249,6 @@ void loop()
       // turn on the LED to indicate the connection:
       digitalWrite(LED_BUILTIN, HIGH);
   
-      // check the battery level every 200ms
-      // while the central is connected:
     
     
       while (central.connected()) {
@@ -262,13 +273,6 @@ void loop()
           uint64_t time_to_wait = next_tick - micros();
           delay((int)floor((float)time_to_wait / 1000.0f));
           delayMicroseconds(time_to_wait % 1000);
-    
-    
-          
-            
-    
-          //updateBatteryLevel();
-            
           
             // when the central disconnects, turn off the LED:
             
@@ -281,23 +285,11 @@ void loop()
     }
 }
 
-
-void updateBatteryLevel() {
-  /* Read the current voltage level on the A0 analog input pin.
-     This is used here to simulate the charge level of a battery.
-  */
-  int battery = analogRead(A0);
-  int batteryLevel = map(battery, 0, 1023, 0, 100);
-
-  if (batteryLevel != oldBatteryLevel) {      // if the battery level has changed
-    Serial.print("Battery Level % is now: "); // print it
-    Serial.println(batteryLevel);
-    batteryLevelChar.writeValue(batteryLevel);  // and update the battery level characteristic
-    oldBatteryLevel = batteryLevel;           // save the level for next comparison
-  }
+void turnOffLED(){
+  digitalWrite(RED, LOW);
+  digitalWrite(GREEN, LOW);
+  digitalWrite(BLUE, LOW);
 }
-
-
 
 
 #if !defined(EI_CLASSIFIER_SENSOR) || EI_CLASSIFIER_SENSOR != EI_CLASSIFIER_SENSOR_ACCELEROMETER
