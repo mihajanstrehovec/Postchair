@@ -160,6 +160,16 @@
       })
     };
 
+    function sleep(milliseconds) {
+      const date = Date.now();
+      let currentDate = null;
+      do {
+        fullscreencontainer.style.backgroundColor = "#F25E5E";
+        document.getElementById("postureStatus").innerHTML = "Bad posture!";
+        currentDate = Date.now();
+      } while (currentDate - date < milliseconds);
+    }
+
     function determinePosture(postureInt) {
       BUFFER[iBuf] = postureInt;
       console.log("trenutna drža: ", postureInt);
@@ -175,9 +185,10 @@
         case 0:
           fullscreencontainer.style.backgroundColor = "#F25E5E";
           document.getElementById("postureStatus").innerHTML = "Bad posture!";
-          
           var mp3 = '<source src="sfx/bad.mp3" type="audio/mpeg">';
           document.getElementById("sound").innerHTML = '<audio autoplay="autoplay">' + mp3 + "</audio>";
+          
+          sleep(2000);
           break;
 
         case 4:
