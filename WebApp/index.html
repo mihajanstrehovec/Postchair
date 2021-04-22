@@ -118,19 +118,20 @@
 
 
       console.log('Requesting Bluetooth Device...');
-      navigator.bluetooth.requestDevice(
-        {filters: [{services: ['battery_service']}]})
+      navigator.bluetooth.requestDevice({
+        acceptAllDevices: true,
+        optionalServices: ['757ab0ec-a387-11eb-bcbc-0242ac130000']})
       .then(device => {
         console.log('Connecting to GATT Server...');
         return device.gatt.connect();
       })
       .then(server => {
         console.log('Getting Posture Service...');
-        return server.getPrimaryService('battery_service');
+        return server.getPrimaryService('757ab0ec-a387-11eb-bcbc-0242ac130000');
       })
       .then(service => {
         console.log('Getting Posture Characteristic...');
-        return service.getCharacteristic('battery_level');
+        return service.getCharacteristic('757ab0ec-a387-11eb-bcbc-0242ac130001');
       })
       .then(characteristic => {
         console.log("Entering Reading loop.");
@@ -140,7 +141,6 @@
         stopBtn.style.display = "block";
         postStat.style.display = "block";
       })
-      
       .catch(error => {
         console.log('Argh! ' + error);
       });
